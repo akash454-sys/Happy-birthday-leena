@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forever & Birthday Scroll Journey</title>
+    <script src="https://kit.fontawesome.com/a14ae32021.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/SplitText.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/GLTFLoader.js"></script>
+    <!-- Include jQuery library - IMPORTANT: Load before any scripts that use $ or jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+
+    <style>
+        @font-face {
+            font-family: digit;
+            src: url('digital-7_mono.ttf') format("truetype"); /* Make sure this font file is in the same directory */
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: #0f0c29;
+            font-size: 12px;
+            overflow-x: hidden; /* Prevent horizontal scroll */
+            position: relative;
+        }
+        #snow-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1001;
+            pointer-events: none;
+        }
+
+        /* First Website Styles - Reverted to original layout logic */
+        #first-website-container {
+            width: 100%;
+            height: 100vh; /* Take full viewport height */
+            position: fixed; /* Covers entire screen initially */
+            top: 0;
+            left: 0;
+            z-index: 1000; /* Ensure it's on top initially */
+            background: #0f0c29; /* Match body background */
+            color: white; /* Ensure text is visible */
+            overflow: hidden; /* Hide scrollbars if content overflows */
+        }
+
+        #content {
+            /* Original styles from your provided code */
+            width: 100%; /* Will be overridden by JS for specific width */
+            height: 100%; /* Will be overridden by JS for specific height */
+            margin-top: 0; /* Will be overridden by JS */
+            margin-left: 0; /* Will be overridden by JS */
+        }
+
+        #loveHeart {
+            float: left; /* Original float */
+            width: 670px;
+            height: 625px;
+            position: relative; /* Needed for absolute positioning of #words */
+        }
+
+        #garden {
+            width: 100%;
+            height: 100%;
+            display: block; /* Ensure canvas is block level */
+        }
+
+        #elapseClock {
+            text-align: right;
+            font-size: 18px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+
+        #words {
+         position: absolute;
+         top: 50%;
+         left: 50%;
+         transform: translate(-50%, -50%);
+         font-family: sans-serif;
+         font-size: 30px;
+         color: white;
+         z-index: 2;
+         display: flex;
+         flex-direction: column;
+         justify-content: center;
+         align-items: center;
+         text-align: center;
+         pointer-events: none;
+       }
+
+
+
+        #messages {
+         font-size: 36px;
+         font-weight: bold;
+          margin-bottom: 10px;
+         display: none;
+         color: #fff;
+        }
+
+     #elapseClock {
+       font-size: 20px;
+        color: #fff;
+       margin-bottom: 10px;
+     }
+
+     #loveu {
+       font-size: 22px;
+       margin-top: 20px;
+       color: #ff94e7;
+       opacity: 0; /* Start completely transparent */
+       position: absolute; /* Take it out of flow to prevent layout shifts */
+       width: 100%; /* Ensure it takes full width for centering */
+       top: 60%; /* Adjust position as needed relative to #words */
+       left: 0;
+       text-align: center; /* Center text within its absolute container */
+     }
+
+
+        #loveu .signature {
+            margin-top: 10px;
+            font-size: 20px;
+            font-style: italic;
+        }
+
+        #code {
+            float: left; /* Original float */
+            width: 440px;
+            color: #ffffff;
+            font-family: "Consolas", "Monaco", "Bitstream Vera Sans Mono", "Courier New", "sans-serif";
+            font-size: 12px;
+            /* margin-top will be set by adjustCodePosition() in JS */
+            /* REMOVED: height and overflow to prevent scrollbar */
+            /* height: 400px; */
+            /* overflow: auto; */
+        }
+
+        #code .string {
+            color: #2a36ff;
+        }
+
+        #code .keyword {
+            color: #7f0055;
+            font-weight: bold;
+        }
+
+        #code .comments {
+            color: #3f7f5f;
+        }
+
+        #code .space {
+            margin-left: 7px;
+            animation: typing 2s steps(20) infinite alternate-reverse;
+        }
+        @keyframes typing {
+            from {
+                width: 0ch;
+            }
+        }
+        
+
+        #copyright {
+            margin-top: 10px;
+            text-align: center;
+            width: 100%;
+            color: #666;
+        }
+
+        #errorMsg {
+            width: 100%;
+            text-align: center;
+            font-size: 24px;
+            position: absolute;
+            top: 100px;
+            left: 0;
+            color: red;
+        }
+        #typewriter-text {
+           color: white;
+           font-size: 1rem;
+           line-height: 1.5;
+           white-space: pre-wrap;
+           }
+
+
+        #icon {
+            font-size: 48px;
+            color: red;
+            margin: 50px;
+            display: block; /* Make it a block element for centering */
+            text-align: center;
+        }
+
+        #heartspan {
+            text-align: center;
+            margin: 20px;
+            display: block;
+        }
+
+        /* Second Website Styles */
+        #second-website-container {
+            /* Hide initially but allow fadeIn to work */
+            display: none;
+            position: relative;
+            width: 100%;
+            min-height: 100vh;
+            z-index: 2;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            min-height: 100vh;
+            padding-top: 1px;
+        }
+
+
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            z-index: 10;
+            padding: 20px;
+            color: white;
+        }
+
+        .hero h1 {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(90deg, #ff8a00, #e52e71);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 20px rgba(229, 46, 113, 0.3);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .hero p {
+            font-size: 1.5rem;
+            max-width: 600px;
+            opacity: 0;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .photo-gallery {
+             width: 90%;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+        }
+
+       .photo-block {
+  height: 100vh; /* Full screen height for each photo */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.photo-item.slide-container {
+  width: 60vw;
+  height: 60vh;
+  background-color: black;
+  border-radius: 20px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.photo-item.slide-container img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  display: block;
+  border-radius: 10px;
+}
+
+
+        .message {
+            font-size: clamp(1.6rem, 4vw, 3rem);
+            line-height: 1.5;
+           font-weight: 600;
+            color: white; /* ✅ Make text white */
+            text-align: center;
+            text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.5); /* Optional: adds glow */
+            
+
+        }
+        .scroll-message {
+            margin: 10px 0 30px;
+            opacity: 0; /* Start hidden */
+            filter: blur(4px); /* Start blurred */
+            transition: opacity 0.5s ease, filter: 0.5s ease; /* Smooth transition */
+        }
+
+        footer {
+            min-height: 30vh; /* reduce height */
+  padding: 40px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 2rem;
+  text-align: center;
+  position: relative;
+  z-index: 10;
+  color: white;
+        }
+
+        .birthday-message {
+            font-size: 1.5rem;
+            margin: 20px auto; /* Center the block */
+            margin-top: 30px;
+            max-width: 800px; /* Limit width for readability */
+            white-space: pre-wrap; /* Preserve whitespace */
+            text-align: center; /* Center the text */
+            opacity: 1; /* Ensure it's visible */
+            color: white;
+            padding-bottom: 20px; /* Space at the bottom */
+        }
+        .slide-container {
+           height: auto;
+           padding: 20px 0;
+           }
+
+.slide {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s ease;
+  display: block;
+}
+
+.slide-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.2rem;
+  font-weight: 500;
+  padding: 10px;
+  text-align: center;
+  color: white;
+  background: rgba(0, 0, 0, 0.6);
+  opacity: 0;
+  transform: scale(0.95);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: none;
+  border-radius: 10px;
+}
+
+.slide-container:hover .slide {
+  transform: translateX(-100%);
+}
+
+.slide-container:hover .slide-text {
+ opacity: 1;
+  transform: scale(1);
+}
+.merged-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 20px;
+}
+
+.grid-item {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 1 / 1;
+  background-color: black;
+}
+
+.grid-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+  display: block;
+}
+
+.caption {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-size: 1.2rem;
+  font-weight: bold;
+  text-align: center;
+  background: rgba(0, 0, 0, 0.6);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.grid-item:hover img {
+  transform: scale(1.05);
+}
+
+.grid-item:hover .caption {
+  opacity: 1;
+}
+
+
+
+        @media (max-width: 768px) {
+            .photo-item {
+                height: 60vh;
+            }
+            .hero h1 {
+                font-size: 3rem;
+            }
+            /* Responsive adjustments for first website */
+            #content {
+                flex-direction: column; /* Stack items vertically */
+                align-items: center; /* Center items horizontally */
+            }
+            #loveHeart, #code {
+                float: none; /* Remove floats */
+                width: 90%; /* Take more width */
+                margin: 10px auto; /* Center with margin */
+            }
+            #words {
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%);
+              font-family: sans-serif;
+             font-size: 24px;
+             color: white;
+             z-index: 2;
+             display: flex;
+             flex-direction: column;
+             justify-content: center;
+              align-items: center;
+              text-align: center;
+              pointer-events: none;
+             }
+            #loveu {
+                margin-right: 0; /* Remove right margin */
+                text-align: center; /* Center text */
+            }
+            
+
+        }
+    </style>
+</head>
+<body>
+    <canvas id="snow-canvas"></canvas>
+    
+    <!-- First Website Section -->
+    <div id="first-website-container">
+        <div id="content">
+            <div id="code">
+                <span class="comments">/**</span><br />
+                <span class="space"/><span class="comments">*// Happpppppppyyyyyyyyyyyyyyyyyy birthdayyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy.</span><br />
+                <span class="space"/><span class="comments">*/</span><br />
+                To the girl owns my heart.<br />
+                Iam blessed to have you thanks for being with me. 💓<br />
+                May you have a long life.<br />
+                I always waited for this day because i wanted to make you feel special<br />
+                and try to make more happiest 💞<br />
+                once again happy birthday to who i can laugh with extent<br />
+                and iam glad i have this person whom i can speak and laugh without fear of being judged.<br />
+                you are someone i can blindly count on always  till my last breath<br />
+                i wish nothing but happiness, peace and love over your life<br />
+                Happy Birthday.🥰🌹<br />
+                
+
+
+                <br>
+                <br>
+                All I want to say is:<br />
+                Just a reminder: you're loved a little extra today (and every day)<br />
+                <br>
+                <br>
+                You are not just a year older, you a whole level cuter<br />
+                <br>
+                <span id="heartspan">
+                <a href="#birthday-section"><i class="fas fa-heart" id="icon"></i></a>
+                </span>
+            </div>
+            <div id="loveHeart">
+                <canvas id="garden"></canvas>
+                <div id="words">
+                    <div id="messages">
+                        FOREVER💕
+                        <div id="elapseClock"></div>
+                    </div>
+                    <div id="loveu">
+                         Because of you my world feels like a sweet dream — Happy Birthday.<br/>
+                        <div class="signature">- 💕</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Second Website Section -->
+    <div id="second-website-container">
+        <section class="hero">
+            <h1 style="font-size: 2.4rem; color: plum velvet; text-align: center; font-weight: bold;">
+  Happy Birthday Leena<br>Scroll down to relive your beautiful memories together
+</h1>
+
+        </section>
+
+   <!-- Updated HTML structure for proper image sizing, centering, and paired messages -->
+<div class="photo-gallery">
+  <div class="photo-block">
+  <div class="photo-item slide-container">
+    <img class="slide" src="images/photo1.jpg" alt="Memory 1">
+    <div class="slide-text">"You are officially too cute to handle… and slightly older now"</div>
+  </div>
+</div>
+
+<div class="photo-block">
+  <div class="photo-item slide-container">
+    <img class="slide" src="images/photo2.jpg" alt="Memory 2">
+    <div class="slide-text">"Age increasing but cuteness remains constant"</div>
+  </div>
+</div>
+
+<div class="photo-block">
+  <div class="photo-item slide-container">
+    <img class="slide" src="images/photo3.jpg" alt="Memory 3">
+    <div class="slide-text">"Uh smile ku than naan addicted  Happy Birthday my cutiee"</div>
+  </div>
+</div>
+
+<div class="photo-block">
+  <div class="photo-item slide-container">
+    <img class="slide" src="images/photo4.jpg" alt="Memory 4">
+    <div class="slide-text">"If cuteness was a superpower you be the strongest in the world"</div>
+  </div>
+</div>
+
+<div class="photo-block">
+  <div class="photo-item slide-container">
+    <img class="slide" src="images/photo5.jpg" alt="Memory 5">
+    <div class="slide-text">"Happy Birthday to the girl who makes my heart smile every single day"</div>
+  </div>
+</div>
+
+<div class="photo-block">
+  <div class="photo-item slide-container">
+    <img class="slide" src="images/photo6.jpg" alt="Memory 6">
+    <div class="slide-text">"Leena you are the sweetest part of my every day  happy birthday cutie"</div>
+  </div>
+</div>
+
+<div class="photo-block">
+  <div class="photo-item slide-container">
+    <img class="slide" src="images/photo7.png" alt="Memory 7">
+    <div class="slide-text">"The best thing that ever happened to me was you"</div>
+  </div>
+</div>
+
+<div class="photo-block">
+  <div class="photo-item slide-container">
+    <img class="slide" src="images/photo8.png" alt="Memory 8">
+    <div class="slide-text">"Smiles that light up every day!"</div>
+  </div>
+</div>
+
+<div class="photo-block">
+  <div class="photo-item slide-container">
+    <img class="slide" src="images/photo9.jpg" alt="Memory 9">
+    <div class="slide-text">"Even on your birthday Iam the one who feels lucky to have you"</div>
+  </div>
+</div>
+
+
+
+<!-- Existing merged grid block remains unchanged -->
+
+<!-- Existing merged grid block remains unchanged -->
+
+
+  <!-- Merged Grid Section (photo11 to photo18) -->
+  <div class="photo-block">
+  <div class="photo-item" style="display: flex; justify-content: center; align-items: center; padding: 40px 0; border-radius: 30px; background-color: #000; width: 95vw; margin: 0 auto;">
+    <div class="merged-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; max-width: 1000px; width: 100%;">
+      <div class="grid-item">
+        <img src="images/photo11.jpg" alt="You">
+        <div class="caption">You</div>
+      </div>
+      <div class="grid-item">
+        <img src="images/photo12.jpeg" alt="gave">
+        <div class="caption">gave</div>
+      </div>
+      <div class="grid-item">
+        <img src="images/photo13.jpg" alt="me">
+        <div class="caption">me</div>
+      </div>
+      <div class="grid-item">
+        <img src="images/photo14.jpeg" alt="my">
+        <div class="caption">my</div>
+      </div>
+      <div class="grid-item">
+        <img src="images/photo15.png" alt="most">
+        <div class="caption">most</div>
+      </div>
+      <div class="grid-item">
+        <img src="images/photo17.png" alt="unforgettable">
+        <div class="caption">unforgettable</div>
+      </div>
+      <div class="grid-item">
+        <img src="images/photo18.jpeg" alt="memory">
+        <div class="caption">memory</div>
+      </div>
+            <div class="grid-item">
+            <img src="images/photo19.png" alt="forever cherished">
+            <div class="caption">forever cherished</div>
+         </div>
+          </div>
+        
+
+         </div>
+
+
+          </div>
+           <footer style="margin: 0; padding: 0; color: white; background-color: transparent; text-align: center; font-size: 2rem; font-weight: bold; line-height: 1.1;">
+             <div style="margin: 0; padding: 0;">Wishing you the happiest of birthdays! ❤️</div>
+            </footer>
+
+
+<div class="birthday-message" style="margin: 0 auto; padding: 10px 0 0 0; text-align: center; max-width: 800px;">
+  Happy Birthday to the girl who has special place in my heart<br>
+  i want to take a momente celebrate the incredible person special day<br>
+  and iam grateful for every moment we shared together<br>
+  On this special day I just want you to see...<br>
+  the smile and laugh but i wouldnt <br><br>
+
+  Your not just beautiful your kind and rare,<br>
+  A soul so pure nothing else can compare<br>
+  Every moment spent with you feels like a dream<br>
+  Like the universe pausing in perfect light<br><br>
+
+  I may not say it often but I care so deep<br>
+  Thoughts of you are the ones I always keep<br>
+  From morning tea to late-night sleep<br>
+  Your the thought that never leaves my mind<br><br>
+
+  I choose you and i choose you<br>
+  over and over and over<br>
+  without pause without doubt in a heartbeat i keep choosing you ever<br>
+  i want you all of you your mistakes your imperfections i want you and only you<br>
+  i dont give up on Your<br><br>
+
+  May your happiness enlarge and your smile wide,<br>
+  And may I always stay by your side.<br>
+  Happy Birthday, today tomorrow and forever,<br>
+  I cherish you always, now and ever. 💖<br>
+  Sorry that i could not make any special for you this year"-"<br>
+  and at last want to say you are the best thing ever happens in my life<br>
+  i always be with you now and forever as long as you want<br>
+</div>
+
+    <script>
+        // garden.js content (reconstructed based on common patterns and your snippets)
+        (function() {
+            function Vector(x, y) {
+                this.x = x;
+                this.y = y;
+            };
+            
+            Vector.prototype = {
+                rotate: function (theta) {
+                    var x = this.x;
+                    var y = this.y;
+                    this.x = Math.cos(theta) * x - Math.sin(theta) * y;
+                    this.y = Math.sin(theta) * x + Math.cos(theta) * y;
+                    return this;
+                },
+                mult: function (f) {
+                    this.x *= f;
+                    this.y *= f;
+                    return this;
+                },
+                clone: function () {
+                    return new Vector(this.x, this.y);
+                },
+                length: function () {
+                    return Math.sqrt(this.x * this.x + this.y * this.y);
+                },
+                subtract: function (v) {
+                    this.x -= v.x;
+                    this.y -= v.y;
+                    return this;
+                },
+                set: function (x, y) {
+                    this.x = x;
+                    this.y = y;
+                    return this;
+                }
+            };
+            
+            function Petal(stretchA, stretchB, startAngle, angle, growFactor, bloom) {
+                this.stretchA = stretchA;
+                this.stretchB = stretchB;
+                this.startAngle = startAngle;
+                this.angle = angle;
+                this.bloom = bloom;
+                this.growFactor = growFactor;
+                this.r = 1;
+                this.isfinished = false;
+            }
+            Petal.prototype = {
+                draw: function () {
+                    var ctx = this.bloom.garden.ctx;
+                    var v1, v2, v3, v4;
+                    v1 = new Vector(0, this.r).rotate(Garden.degrad(this.startAngle));
+                    v2 = v1.clone().rotate(Garden.degrad(this.angle));
+                    v3 = v1.clone().mult(this.stretchA);
+                    v4 = v2.clone().mult(this.stretchB);
+                    let grad = ctx.createRadialGradient(0, 0, 0, 0, 0, this.r);
+grad.addColorStop(0, "rgba(255,255,255,0.9)");
+grad.addColorStop(1, this.bloom.c);
+ctx.fillStyle = grad;
+
+ctx.beginPath();
+ctx.moveTo(v1.x, v1.y);
+ctx.bezierCurveTo(v3.x, v3.y, v4.x, v4.y, v2.x, v2.y);
+ctx.closePath();
+ctx.fill();
+
+                },
+                render: function () {
+                    if (this.r <= this.bloom.r) {
+                        this.r += this.growFactor;
+                        this.draw();
+                    } else {
+                        this.isfinished = true;
+                    }
+                }
+            }
+
+            function Bloom(p, r, c, pc, garden) {
+                this.p = p;
+                this.r = r;
+                this.c = c;
+                this.pc = pc;
+                this.petals = [];
+                this.garden = garden;
+                this.init();
+                this.garden.addBloom(this);
+            }
+            Bloom.prototype = {
+                draw: function () {
+                    var p, isfinished = true;
+                    this.garden.ctx.save();
+                    this.garden.ctx.translate(this.p.x, this.p.y);
+                    for (var i = 0; i < this.petals.length; i++) {
+                        p = this.petals[i];
+                        p.render();
+                        isfinished *= p.isfinished;
+                    }
+                    this.garden.ctx.restore();
+                    if (isfinished == true) {
+                        this.garden.removeBloom(this);
+                    }
+                },
+                init: function () {
+                    var angle = 360 / this.pc;
+                    var startAngle = Garden.randomInt(0, 90);
+                    for (var i = 0; i < this.pc; i++) {
+                        this.petals.push(new Petal(Garden.random(Garden.options.petalStretch.min, Garden.options.petalStretch.max), Garden.random(Garden.options.petalStretch.min, Garden.options.petalStretch.max), startAngle + i * angle, angle, Garden.random(Garden.options.growFactor.min, Garden.options.growFactor.max), this));
+                    }
+                }
+            }
+
+            window.Garden = function(ctx, element) {
+                this.blooms = [];
+                this.element = element;
+                this.ctx = ctx;
+            }
+            Garden.prototype = {
+                render: function () {
+                    for (var i = 0; i < this.blooms.length; i++) {
+                        this.blooms[i].draw();
+                    }
+                },
+                addBloom: function (b) {
+                    this.blooms.push(b);
+                },
+                removeBloom: function (b) {
+                    var bloom;
+                    for (var i = 0; i < this.blooms.length; i++) {
+                        bloom = this.blooms[i];
+                        if (bloom === b) {
+                            this.blooms.splice(i, 1);
+                            return this;
+                        }
+                    }
+                },
+                createRandomBloom: function (x, y) {
+                    this.createBloom(x, y, Garden.randomInt(Garden.options.bloomRadius.min, Garden.options.bloomRadius.max), Garden.randomrgba(Garden.options.color.rmin, Garden.options.color.rmax, Garden.options.color.gmin, Garden.options.color.gmax, Garden.options.color.bmin, Garden.options.color.bmax, Garden.options.color.opacity), Garden.randomInt(Garden.options.petalCount.min, Garden.options.petalCount.max));
+                },
+                createBloom: function (x, y, r, c, pc) {
+                    new Bloom(new Vector(x, y), r, c, pc, this);
+                },
+                clear: function () {
+                    this.blooms = [];
+                    this.ctx.clearRect(0, 0, this.element.width, this.element.height);
+                }
+            }
+
+            Garden.options = {
+                petalCount: {
+                    min: 8,
+                    max: 15
+                },
+                petalStretch: {
+                    min: 0.1,
+                    max: 3
+                },
+                growFactor: {
+                    min: 0.1,
+                    max: 1
+                },
+                bloomRadius: {
+                    min: 8,
+                    max: 10
+                },
+                density: 10,
+                growSpeed: 1000 / 60,
+                color: {
+                    rmin: 128,
+                    rmax: 255,
+                    gmin: 0,
+                    gmax: 128,
+                    bmin: 0,
+                    bmax: 128,
+                    opacity: 0.1
+                },
+                tanAngle: 60
+            };
+            Garden.random = function (min, max) {
+                return Math.random() * (max - min) + min;
+            };
+            Garden.randomInt = function (min, max) {
+                return Math.floor(Math.random() * (max - min + 1)) + min;
+            };
+            Garden.circle = 2 * Math.PI;
+            Garden.degrad = function (angle) {
+                return Garden.circle / 360 * angle;
+            };
+            Garden.raddeg = function (angle) {
+                return angle / Garden.circle * 360;
+            };
+            Garden.rgba = function (r, g, b, a) {
+                return 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')';
+            };
+            Garden.randomrgba = function (rmin, rmax, gmin, gmax, bmin, bmax, a) {
+                var r = Math.round(Garden.random(rmin, rmax));
+                var g = Math.round(Garden.random(gmin, gmax));
+                var b = Math.round(Garden.random(bmin, bmax));
+                var limit = 5;
+                if (Math.abs(r - g) <= limit && Math.abs(g - b) <= limit && Math.abs(b - r) <= limit) {
+                    return Garden.rgba(rmin, rmax, gmin, gmax, bmin, bmax, a);
+                } else {
+                    return Garden.rgba(r, g, b, a);
+                }
+            };
+        })();
+
+        // functions.js content (reconstructed based on your snippets)
+        var $window = $(window), gardenCtx, gardenCanvas, $garden, garden;
+        var clientWidth = $(window).width();
+        var clientHeight = $(window).height();
+        var offsetX, offsetY; // Declare globally
+
+        // Snowfall variables and functions (moved outside initSecondWebsiteAnimations)
+        const snowCanvas = document.getElementById('snow-canvas');
+        const snowCtx = snowCanvas.getContext('2d');
+        const snowflakes = [];
+        const snowflakeCount = 250;
+
+        class Snowflake {
+            constructor() {
+                this.x = Math.random() * snowCanvas.width;
+                this.y = Math.random() * snowCanvas.height * -1;
+                this.size = Math.random() * 3 + 1;
+                this.speed = Math.random() * 2 + 1;
+                this.velocity = Math.random() * 0.5;
+                this.angle = Math.random() * 360;
+                this.spin = Math.random() < 0.5 ? 1 : -1;
+                this.opacity = Math.random() * 0.5 + 0.3;
+            }
+
+            update() {
+                this.y += this.speed;
+                this.x += Math.sin(this.angle * Math.PI / 180) * this.velocity;
+                this.angle += 0.1 * this.spin;
+
+                if (this.y > snowCanvas.height) {
+                    this.y = Math.random() * 20 - 20;
+                    this.x = Math.random() * snowCanvas.width;
+                }
+            }
+
+            draw() {
+                snowCtx.beginPath();
+                snowCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                snowCtx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+                snowCtx.shadowBlur = 10;
+                snowCtx.shadowColor = 'rgba(255, 255, 255, 0.8)';
+                snowCtx.fill();
+            }
+        }
+
+        function initSnowfall() {
+            snowCanvas.width = window.innerWidth;
+            snowCanvas.height = window.innerHeight;
+            for (let i = 0; i < snowflakeCount; i++) {
+                snowflakes.push(new Snowflake());
+            }
+            animateSnow();
+        }
+
+        function animateSnow() {
+            snowCtx.clearRect(0, 0, snowCanvas.width, snowCanvas.height);
+            for (let flake of snowflakes) {
+                flake.update();
+                flake.draw();
+            }
+            requestAnimationFrame(animateSnow);
+        }
+
+        window.addEventListener('resize', () => {
+            snowCanvas.width = window.innerWidth;
+            snowCanvas.height = window.innerHeight;
+        });
+
+
+        // This function is called by jQuery's ready event
+        $(function () {
+            // setup garden
+            $loveHeart = $("#loveHeart");
+            offsetX = $loveHeart.width() / 2;
+            offsetY = $loveHeart.height() / 2 - 55;
+            $garden = $("#garden");
+            gardenCanvas = $garden[0];
+            gardenCanvas.width = $loveHeart.width(); // Use $loveHeart width
+            gardenCanvas.height = $loveHeart.height(); // Use $loveHeart height
+            gardenCtx = gardenCanvas.getContext("2d");
+            gardenCtx.globalCompositeOperation = "lighter";
+            garden = new Garden(gardenCtx, gardenCanvas);
+            
+            // Original content positioning logic
+            $("#content").css("width", ($loveHeart.width() + $("#code").width()));
+            $("#content").css("height", Math.max($loveHeart.height(), $("#code").height()));
+            $("#content").css("margin-top", Math.max(($window.height() - $("#content").height()) / 2, 10));
+            $("#content").css("margin-left", Math.max(($window.width() - $("#content").width()) / 2, 10));
+
+            // renderLoop for garden animation
+            setInterval(function () {
+                garden.render();
+            }, Garden.options.growSpeed);
+
+            // Start the typewriter effect immediately
+            $("#code").typewriter(function () {
+              startHeartAnimation(); // This callback ensures heart animation starts AFTER typewriter finishes
+            });
+
+            // Set up time elapse
+            var together = new Date();
+            together.setFullYear(2022, 6, 11); // Year: 2022, Month: July (0-indexed, so 6 is July)
+            together.setHours(1); // 1 AM
+            together.setMinutes(0); // 0 minutes
+            together.setSeconds(0);
+            together.setMilliseconds(0);
+
+            timeElapse(together);
+            setInterval(function () {
+                timeElapse(together);
+            }, 500);
+
+            // Initialize snowfall immediately on document ready
+            initSnowfall(); 
+        });
+
+        $(window).resize(function() {
+            var newWidth = $(window).width();
+            var newHeight = $(window).height();
+            // Only reload if dimensions change significantly, not just a pixel or two
+            if (Math.abs(newWidth - clientWidth) > 50 || Math.abs(newHeight - clientHeight) > 50) {
+                location.reload();
+            }
+        });
+
+        function getHeartPoint(angle) {
+            var t = angle / Math.PI;
+            var x = 19.5 * (16 * Math.pow(Math.sin(t), 3));
+            var y = - 20 * (13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
+            return [offsetX + x, offsetY + y];
+        }
+
+        function startHeartAnimation() {
+            var interval = 50;
+            var angle = 10;
+            var heart = [];
+            var animationTimer = setInterval(function () {
+                var bloom = getHeartPoint(angle);
+                var draw = true;
+                for (var i = 0; i < heart.length; i++) {
+                    var p = heart[i];
+                    var distance = Math.sqrt(Math.pow(p[0] - bloom[0], 2) + Math.pow(p[1] - bloom[1], 2));
+                    if (distance < Garden.options.bloomRadius.max * 1.3) {
+                        draw = false;
+                        break;
+                    }
+                }
+                if (draw) {
+                    heart.push(bloom);
+                    garden.createRandomBloom(bloom[0], bloom[1]);
+                }
+                if (angle >= 30) {
+                    clearInterval(animationTimer);
+                    showMessages();
+                } else {
+                    angle += 0.2;
+                }
+            }, interval);
+        }
+
+        // Typewriter plugin for jQuery
+        (function($) {
+    $.fn.typewriter = function(callback) {
+        this.each(function() {
+            var $ele = $(this), str = $ele.html(), progress = 0;
+            $ele.html('');
+            var timer = setInterval(function() {
+                var current = str.charAt(progress);
+                if (current === '<') {
+                    progress = str.indexOf('>', progress) + 1;
+                } else {
+                    progress++;
+                }
+                $ele.html(str.substring(0, progress) + (progress & 1 ? '_' : ''));
+                if (progress >= str.length) {
+                    clearInterval(timer);
+                    if (typeof callback === "function") callback();
+                }
+            }, 75);
+        });
+        return this;
+    };
+})(jQuery);
+
+
+        function timeElapse(date){
+            var current = new Date();
+            var seconds = Math.floor((current.getTime() - date.getTime()) / 1000);
+            var days = Math.floor(seconds / (3600 * 24));
+            seconds = seconds % (3600 * 24);
+            var hours = Math.floor(seconds / 3600);
+            if (hours < 10) {
+                hours = "0" + hours;
+            }
+            seconds = seconds % 3600;
+            var minutes = Math.floor(seconds / 60);
+            if (minutes < 10) {
+                minutes = "0" + minutes;
+            }
+            seconds = seconds % 60;
+            if (seconds < 10) {
+                seconds = "0" + seconds;
+            }
+            var result = "<span class=\"digit\">" + days + "</span> days <span class=\"digit\">" + hours + "</span> hours <span class=\"digit\">" + minutes + "</span> minutes <span class=\"digit\">" + seconds + "</span> seconds"; 
+            $("#elapseClock").html(result);
+        }
+
+        function showMessages() {
+            $('#messages').fadeIn(5000, function() {
+                showLoveU();
+                // After all animations on the first page, transition to the second
+                setTimeout(function() {
+                    $('#first-website-container').fadeOut(1000, function() {
+                        $('#second-website-container').css('display', 'block').hide().fadeIn(1000, function() {
+                            initSecondWebsiteAnimations();
+                        });
+                    });
+                }, 3000);
+            });
+        }
+
+        function adjustCodePosition() {
+            // Original logic for code positioning
+            // This function might need re-evaluation if #code height is dynamic
+            // For now, it's not being called anywhere, so it's not affecting layout.
+            // $('#code').css("margin-top", ($("#garden").height() - $("#code").height()) / 2);
+        }
+
+        
+        function showLoveU() {
+            // Use animate for opacity control, and ensure it's visible before animating
+            $('#loveu').css('display', 'block').animate({ opacity: 1 }, 3000);
+        }
+
+        // Second Website JavaScript (now without snowfall init)
+        function initSecondWebsiteAnimations() {
+            gsap.registerPlugin(ScrollTrigger);
+
+            // Animate hero text
+            gsap.from(".hero h1", {
+            scrollTrigger: {
+            trigger: ".hero",
+            start: "top 70%",
+            toggleActions: "play reverse play reverse"
+            },
+            duration: 1.5,
+            y: -50,
+            opacity: 0,
+            ease: "back.out(1.7)"
+            });
+
+           gsap.from(".hero p", {
+           scrollTrigger: {
+           trigger: ".hero",
+           start: "top 70%",
+           toggleActions: "play reverse play reverse"
+           },
+           duration: 1,
+           delay: 0.5,
+           opacity: 0,
+           ease: "power2.out"
+           });
+
+
+            // Photo animations
+            const photoBlocks = gsap.utils.toArray(".photo-block");
+
+photoBlocks.forEach((block) => {
+  const photo = block.querySelector(".photo-item");
+  const message = block.querySelector(".scroll-message");
+
+  gsap.to(photo, {
+    scrollTrigger: {
+      trigger: block,
+      start: "top 80%",
+      end: "top 30%",
+      scrub: 0.5,
+    },
+    opacity: 1,
+    scale: 1,
+    duration: 1,
+    ease: "power2.out"
+  });
+
+  if (message) {
+    gsap.to(message, {
+      scrollTrigger: {
+        trigger: block,
+        start: "top 60%",
+        end: "top 30%",
+        scrub: 0.5,
+      },
+      opacity: 1,
+      filter: "blur(0px)",
+      duration: 1,
+      ease: "power2.out"
+    });
+  }
+
+  // Hover effects
+  photo.addEventListener("mouseenter", () => {
+    const img = photo.querySelector("img");
+    if (img) {
+      gsap.to(img, {
+        scale: 1.1,
+        duration: 0.5
+      });
+    }
+  });
+
+  photo.addEventListener("mouseleave", () => {
+    const img = photo.querySelector("img");
+    if (img) {
+      gsap.to(img, {
+        scale: 1,
+        duration: 0.5
+      });
+    }
+  });
+});
+
+            // Footer animation
+            ScrollTrigger.create({
+                trigger: "footer",
+                start: "top 80%",
+                onEnter: () => {
+                    gsap.from("footer div", {
+                        duration: 1,
+                        y: 50,
+                        opacity: 0,
+                        ease: "back.out(1.7)"
+                    });
+                }
+            });
+
+            // SplitText animation
+            gsap.from(".split-title", {
+            opacity: 0,
+            y: 40,
+            duration: 1,
+            ease: "power3.out",
+            });
+        }
+    </script>
+</body>
+</html>
